@@ -1,6 +1,6 @@
 import * as z from "zod";
 
-export const tokenSchema = z.object({
+export const baseTokenSchema = z.object({
   tokenName: z
     .string()
     .min(3, { message: "Token Name must be at least 3 characters" }),
@@ -10,34 +10,14 @@ export const tokenSchema = z.object({
   tokenInitsupply: z.coerce.number().min(21000000, {
     message: "Initial supply must be at least greater than 21000000.",
   }),
-  maxSupply: z.coerce.number().min(21000000, {
-    message: "Max supply must be at least greater than 21000000.",
-  }),
-  buyTaxfee: z.coerce
-    .number()
-    .max(3, {
-      message: "Total supply must be at least less than 3%.",
-    })
-    .min(0, {
-      message: "Initial supply must be at least greater than 0.",
-    }),
-  sellTaxfee: z.coerce
-    .number()
-    .max(3, {
-      message: "Total supply must be at least less than 3%.",
-    })
-    .min(0, {
-      message: "Initial supply must be at least greater than 0.",
-    }),
-  liqidityShare: z.coerce.number().max(100, {
-    message: "Initial supply must be at least greater than 100%.",
-  }),
-  teamShare: z.coerce.number().max(100, {
-    message: "Initial supply must be at least greater than 100%.",
-  }),
   tokenDecimals: z.coerce
     .number()
     .max(18, { message: "Initial supply must be at least greater than 18." }),
+  maxSupply: z.number().optional(),
+  buyTaxfee: z.number().optional(),
+  sellTaxfee: z.number().optional(),
+  liqidityShare: z.number().optional(),
+  teamShare: z.number().optional(),
 });
 
-export type TokenFormValues = z.infer<typeof tokenSchema>;
+export type TokenFormValues = z.infer<typeof baseTokenSchema>;

@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { tokenSchema, type TokenFormValues } from "@/lib/form-schema";
+import { baseTokenSchema, type TokenFormValues } from "@/lib/form-schema";
 import { useAccount } from "wagmi";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -64,8 +64,43 @@ export default function Page() {
 
   const cardRefs = [card1Ref, card2Ref, card3Ref, card4Ref, card5Ref];
 
+  const formSchema = ismint
+    ? baseTokenSchema.extend({
+        maxSupply: z.coerce.number().min(21000000, {
+          message: "Max supply must be at least greater than 21000000.",
+        }),
+      })
+    : baseTokenSchema;
+
+  const schema = istax
+    ? formSchema.extend({
+        buyTaxfee: z.coerce
+          .number()
+          .max(3, {
+            message: "Total supply must be at least less than 3%.",
+          })
+          .min(0, {
+            message: "Initial supply must be at least greater than 0.",
+          }),
+        sellTaxfee: z.coerce
+          .number()
+          .max(3, {
+            message: "Total supply must be at least less than 3%.",
+          })
+          .min(0, {
+            message: "Initial supply must be at least greater than 0.",
+          }),
+        liqidityShare: z.coerce.number().max(100, {
+          message: "Initial supply must be at least greater than 100%.",
+        }),
+        teamShare: z.coerce.number().max(100, {
+          message: "Initial supply must be at least greater than 100%.",
+        }),
+      })
+    : formSchema;
+
   const form = useForm<TokenFormValues>({
-    resolver: zodResolver(tokenSchema),
+    resolver: zodResolver(schema),
     mode: "onChange",
   });
 
@@ -74,7 +109,7 @@ export default function Page() {
     formState: { errors },
   } = form;
 
-  async function onSubmit(values: z.infer<typeof tokenSchema>) {
+  async function onSubmit(values: z.infer<typeof schema>) {
     const formvalue = form.getValues();
     const res = await fetch(`/api/home`, {
       method: "POST",
